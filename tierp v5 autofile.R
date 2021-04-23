@@ -1,4 +1,4 @@
-library(tidyverse)
+library(dplyr)
 library(ggplot2)
 library(data.table)
 library(rhdf5)
@@ -8,7 +8,7 @@ library(tidyquant)
 
 #set wd
 #setwd("C:/Users/shona/OneDrive/Desktop/n2 vs 269/n2 vs apw269/final")
-setwd("D:/APW Lab/Food ON OFF/TRIAL 3/Results")
+setwd("D:/APW Lab/Food ON OFF/trial 3/Results")
 temp = intersect(list.files(pattern = "\\.hdf5$", full.names = T), list.files(pattern = "featuresN", full.names = T))
 
 my_data = list()
@@ -21,6 +21,7 @@ for (i in unique(temp)){
   meta <- as.data.frame(meta)
   df = h5read(file = i, name = "timeseries_data")
   df = as.data.frame(df)
+  #add column with i
   
   meta = meta %>% filter(worm_label == 1)
   df = df %>% filter(worm_index %in% meta$worm_index_joined)
