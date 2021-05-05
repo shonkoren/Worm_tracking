@@ -35,7 +35,33 @@ for (i in unique(temp)){
 
 h5closeAll()
 agg = data.frame(rbindlist(my_data)) %>% 
-  mutate(ROI = stringr::str_extract(Label, "(?<=nd2:)(.*)(?=:c:)"))
+  mutate(file = stringr::str_extract(file.ID, "(?<=/)[^_]+")) %>% 
+  mutate(food = case_when(grepl('f', file) ~ 'food',
+                          grepl('s', file) ~ 'starve')) %>%
+  mutate(geno = case_when(grepl('a', file) ~ 'AMPK KO',
+                          grepl('n', file) ~ 'WT')) %>%
+  mutate(group = case_when(food == 'food' & geno == 'WT' ~ 'WT Food',
+                           food == 'starve' & geno == 'WT' ~ 'WT Starve',
+                           food == 'food' & geno == 'AMPK KO' ~ 'AMPK KO Food',
+                           food == 'starve' & geno == 'AMPK KO' ~ 'AMPK KO Starve'))
+avg.agg = agg %>% filter(timestamp > 200) %>% group_by(group, file) %>% na.omit() %>% 
+  summarise(mean = mean(abs(speed))) %>% as.data.frame()
+ggstatsplot::ggwithinstats(data = avg.agg, x = group, y = mean, 
+                            pairwise.display = "all", p.adjust.method = "fdr")
+
+ggplot(avg.agg, aes(x = group, y = mean)) + geom_boxplot()
+                           
+
+
+
+
+
+
+
+
+
+
+
 
 ##Filter for movement, add time instead of frame, correct for fps diff, label genos or trials
 n22.data.ff = n22.data.f %>% select(1:4) %>% filter(!between(timestamp, 0, 48)) %>% mutate(time = timestamp / 48) %>% mutate(trial = "WT 1") %>% mutate(geno = 'WT')
