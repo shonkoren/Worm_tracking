@@ -44,21 +44,12 @@ agg = data.frame(rbindlist(my_data)) %>%
                            food == 'starve' & geno == 'WT' ~ 'WT Starve',
                            food == 'food' & geno == 'AMPK KO' ~ 'AMPK KO Food',
                            food == 'starve' & geno == 'AMPK KO' ~ 'AMPK KO Starve'))
-avg.agg = agg %>% filter(timestamp > 200) %>% group_by(group, file) %>% na.omit() %>% 
+avg.agg = agg %>% filter(timestamp > 200) %>% group_by(group, worm_index) %>% na.omit() %>% 
   summarise(mean = mean(abs(speed))) %>% as.data.frame()
 ggstatsplot::ggwithinstats(data = avg.agg, x = group, y = mean, 
                             pairwise.display = "all", p.adjust.method = "fdr")
 
-ggplot(avg.agg, aes(x = group, y = mean)) + geom_boxplot()
-                           
-
-
-
-
-
-
-
-
+# write.csv(avg.agg, 'avg.agg.csv')
 
 
 
