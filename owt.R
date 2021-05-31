@@ -20,7 +20,7 @@ for (i in unique(temp)){
   df = h5read(file = i, name = "features_means")
   df = as.data.frame(df)
   #add column with i
-  
+  df = dfx
   df = df %>% select(1:3, 5, 694, 661, 708) %>% filter(as.numeric(n_valid_skel) > 300)
   df$file.ID <- i
   worms[[i]] = df %>% distinct(worm_index) %>% pull(worm_index)
