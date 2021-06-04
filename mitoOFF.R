@@ -70,7 +70,7 @@ avg.agg = agg %>% group_by(group, worm_ID) %>%
             meanU = mean(upsilon), meanUF = mean(upsilon_turns_frequency), meanD = mean(worm_dwelling),
             meanPC = mean(path_curvature), mean.absPC = mean(path_curvature)) %>% as.data.frame()
 }
-write.csv(avg.agg, 'avg.agg.csv')
+# write.csv(avg.agg, 'avg.agg.csv')
 
 {
   pof = ggstatsplot::ggbetweenstats(data = avg.agg, x = group, y = meanOF, type = 'np', 
@@ -97,13 +97,16 @@ agg2 = data.frame(rbindlist(my_data2)) %>%
                            ATR == 'unt' & light == 'Light' & food == 'Off-Food' & starve == 'Pre' ~ 'A-L+F-',
                            ATR == 'unt' & light == 'Light' & food == 'Food' & starve == 'Pre' ~ 'A-L+F+')) %>%
   mutate(skeleton_fit = case_when(skeleton_id == -1 ~ NaN, TRUE ~ skeleton_id)) %>%
-  mutate(worm_ID = paste0(worm_index,".",file)) %>% group_by(worm_ID) %>% arrange(group, file, worm_ID, timestamp) %>% 
+  mutate(worm_ID = paste0(worm_index,".",file)) %>% group_by(worm_ID) %>% arrange(worm_ID, timestamp) %>% na.omit() %>%
   mutate(difference_f = timestamp - lead(timestamp),
          difference_mm = motion_modes - lead(motion_modes)) %>%
-  mutate(reversal = case_when(difference_f == 1 | 2 | 3 | 4 | 5 & difference_mm == 0 ~ 0,
-                              difference_f == 1 | 2 | 3 | 4 | 5 & difference_mm == 1 | 2 ~ 1,
-                              TRUE ~ NaN)) %>%
-  mutate(RevNum = sum(reversal)) %>% arrange(group, file, worm_ID, timestamp) %>% na.omit() %>% select(1,10,16) %>% distinct()
+  mutate(reversal = case_when(difference_f <10 & difference_mm == -2 ~ 1,
+                              TRUE ~ 0)) %>%
+  mutate(RevNum = sum(reversal)) %>% arrange(group, file, worm_ID, timestamp) %>% na.omit() %>% select(c(12,14,18)) %>% distinct()
 
-agg.agg = left_join(agg, agg2) %>% ungroup() %>% filter(!is.na(RevNum)) %>% mutate(RevFreq = 1000 * RevNum / n_frames)
-
+agg.agg = left_join(agg, agg2) %>% ungroup() %>% filter(!is.na(RevNum)) %>% mutate(RevFreq = (10 * RevNum) / n_frames)
+# ggplot(agg2, aes(x = timestamp, y = reversal)) + geom_line() + facet_wrap(~ group)
+prf = ggstatsplot::ggbetweenstats(data = agg.agg, x = group, y = RevFreq, 
+                                  pairwise.display = "all", p.adjust.method = "fdr", bf.message = FALSE,
+                                  xlab = "Group", ylab = "Reversal Frequency (1/s)")
+prf

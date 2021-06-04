@@ -95,7 +95,7 @@ pr = ggstatsplot::ggbetweenstats(data = agg2, x = group, y = RevNum,
                                  pairwise.display = "all", p.adjust.method = "fdr", bf.message = FALSE,
                                  xlab = "Group", ylab = "Reversals")
 
-agg.agg = left_join(agg, agg2) %>% ungroup() %>% filter(!is.na(RevNum)) %>% mutate(RevFreq = 1000 * RevNum / n_frames)
+agg.agg = left_join(agg, agg2) %>% ungroup() %>% filter(!is.na(RevNum)) %>% mutate(RevFreq = 10 * RevNum / n_frames)
 prf = ggstatsplot::ggbetweenstats(data = agg.agg, x = group, y = RevFreq, 
                                   pairwise.display = "all", p.adjust.method = "fdr", bf.message = FALSE,
                                   xlab = "Group", ylab = "Reversal Frequency (1/s)")
