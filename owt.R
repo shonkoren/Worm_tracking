@@ -53,7 +53,7 @@ agg$omega_turns_frequency[is.nan(agg$omega_turns_frequency)]=0
 agg$upsilon_turns_frequency[is.nan(agg$upsilon_turns_frequency)]=0
 agg = agg %>% mutate(omega = omega_turns_frequency * n_frames, upsilon = upsilon_turns_frequency * n_frames) %>%
   mutate(worm_ID = paste0(worm_index,".",file)) }
-avg.agg = agg %>% group_by(group, worm_index) %>%
+avg.agg = agg %>% group_by(group, worm_ID) %>%
   summarise(meanO = mean(omega), meanOF = mean(omega_turns_frequency), 
             meanU = mean(upsilon), meanUF = mean(upsilon_turns_frequency), meanD = mean(worm_dwelling),
             meanPC = mean(path_curvature), mean.absPC = mean(path_curvature)) %>% as.data.frame()
