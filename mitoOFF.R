@@ -82,6 +82,7 @@ write.csv(avg.agg, 'avg.agg600f.filterbad.csv')
   pof
   }
   
+{
 agg2 = data.frame(rbindlist(my_data2)) %>%
   mutate(file = stringr::str_extract(file.ID, "(?<=/)[^_]+")) %>% 
   mutate(ATR = case_when(grepl('A', file) ~ 'ATR',
@@ -104,17 +105,18 @@ agg2 = data.frame(rbindlist(my_data2)) %>%
   mutate(worm_ID = paste0(worm_index,".",file)) %>% group_by(worm_ID) %>% arrange(worm_ID, timestamp) %>% na.omit() %>%
   mutate(difference_f = timestamp - lag(timestamp),
          difference_mm = motion_modes - lead(motion_modes)) %>%
-  mutate(reversal = case_when(difference_f <10 & difference_mm == 2 ~ 1,
+  mutate(reversal = case_when(difference_f == 1 & difference_mm == 2 ~ 1,
                               TRUE ~ 0)) %>%
   mutate(RevNum = sum(reversal)) %>% arrange(group, file, worm_ID, timestamp) %>% na.omit() %>% select(c(12,14,18)) %>% distinct()
 
 agg.agg = left_join(agg, agg2) %>% ungroup() %>% filter(!is.na(RevNum)) %>% mutate(RevFreq = (10 * RevNum) / n_frames)
+}
 # ggplot(agg2, aes(x = timestamp, y = reversal)) + geom_line() + facet_wrap(~ group)
 prf = ggstatsplot::ggbetweenstats(data = agg.agg, x = group, y = RevFreq, 
                                   pairwise.comparisons = F, p.adjust.method = "fdr", bf.message = FALSE,
                                   xlab = "Group", ylab = "Reversal Frequency (1/s)")
 prf
-ggplot(agg2, aes(x = group, y = RevNum)) + geom_boxplot()
-write.csv(agg.agg, 'agg.agg.csv')
+ggplot(agg.agg, aes(x = group, y = RevFreq)) + geom_boxplot()
+# write.csv(agg.agg, 'rev.agg.agg.csv')
 
 
